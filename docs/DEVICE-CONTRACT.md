@@ -1,36 +1,19 @@
 # Device contract notes
 
-M0 should implement only the minimum Exec/device surface required by the probe
-and then by ABBS.
+M0.1 exposes a serial-shaped `IOExtSer` interface but implements only generic
+Exec commands confirmed in NDK 3.2 R4 `exec/io.h`: `CMD_READ`, `CMD_WRITE`,
+`CMD_CLEAR`, `CMD_FLUSH`, and `CMD_RESET`.
 
-Candidate generic commands to support/log:
+The inspected R4 `devices/serial.h` defines `IOExtSer` and the serial-specific
+commands beginning at `CMD_NONSTD`. M0.1 does not implement, redefine, or guess
+those command values. Unsupported requests receive `IOERR_NOCMD` as specified
+by `exec/errors.h`.
 
-- CMD_READ
-- CMD_WRITE
-- CMD_CLEAR
-- CMD_FLUSH
-- CMD_RESET
-- CMD_START
-- CMD_STOP
+The one non-production command, `ABBTCP_CMD_INJECT_RING`, lives at the documented
+project-private base `CMD_NONSTD + 0x0100` so it does not collide with NDK serial
+commands. Only `abbstcp-probe` uses it.
 
-Serial-specific commands must be added only after checking the AmigaOS NDK and
-observing what ABBS actually sends.
-
-## Hayes state machine
-
-    IDLE -> RINGING -> ONLINE -> IDLE
-
-- `AT` -> `OK`
-- `ATZ` -> `OK`
-- synthetic incoming call -> `RING`
-- `ATA` while ringing -> `CONNECT 38400`
-- `ATH` -> `NO CARRIER`
-
-## Logging
-
-Record at least unit, command number, flags, requested length, actual length,
-payload, and state transitions.
-
-The key M0 question is:
-
-> Which Exec/serial commands does ABBS actually issue to a modem device?
+The key post-probe question remains: which generic and serial commands does ABBS
+actually issue? Configure device `abbstcp.device`, unit `0`, observe the kernel
+diagnostics, and use those observations to define M1. No networking belongs in
+this milestone.

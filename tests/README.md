@@ -3,5 +3,6 @@
 Host-side checks can validate only source invariants and the tiny modem state
 machine. They cannot validate an AmigaOS device ABI.
 
-The authoritative M0 acceptance test is a real FS-UAE/AmigaOS run using a
-device built against the AmigaOS NDK.
+Run `make check` for those source-only invariants. The authoritative M0.1 test
+is the documented FS-UAE/AmigaOS probe using the VBCC build against official
+NDK 3.2 R4 headers.
